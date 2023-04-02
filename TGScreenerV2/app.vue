@@ -16,4 +16,5 @@
   import { optionsCaller } from "/server/libs/orat";
   const oc = new optionsCaller("AAPL", 0.3, 30, 0.05, 3000);
   const data = await oc.retrieve();
+  console.log(data)
 </script>

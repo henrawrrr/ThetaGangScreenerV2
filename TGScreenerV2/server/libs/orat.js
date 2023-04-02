@@ -29,23 +29,58 @@ export class optionsCaller {
 		this.#ticker = ticker;
 		this.#theta = theta;
 		this.#dte = dte;
-		this.#roi = roi;
+		this.#roi = roi * collat;
 		this.#collat = collat;
 	}
 
 	#getTestData = async () => {
-		console.log(testData)
 		return testData;
 	}
 
 	#parseData = (data) => {
 		const res = data.data;
-		res.filter(e => e.dte >= this.#dte - 7 && e.dte <= this.#dte + 7)
-		return res;
+		const newres = res.filter(e => e.dte >= this.#dte - 7 && e.dte <= this.#dte + 7)
+		const puts = [];
+		const calls = [];
+		newres.forEach(strike => {
+			if (strike.callVolume != 0) {
+				calls.push([strike.expirDate, strike.strike, strike.callValue, strike.theta])
+			}
+			if (strike.putVolume != 0) {
+				puts.push([strike.expirDate, strike.strike, strike.putValue, strike.theta])
+			}
+		})
+		const pcs = [];
+		const ccs = [];
+		for (let i = 0; i < puts.length; i++) {
+			for (let j = i; j < puts.length; j++) {
+				const dtheta = Math.abs(puts[i].theta - puts[j].theta) * -1;
+				const dprice = Math.abs(puts[i].putValue - puts[j].putValue) * 100;
+				const dstrike = Math.abs(puts[i].strike - puts[j].strike) * 100;
+				if (dtheta <= this.#theta && dprice >= this.#roi && dstrike <= this.#collat) {
+					pcs.push([puts[i].strike, puts[j].strike], puts[i].putValue, puts[j].putValue, dtheta, dprice, dstrike)
+				}
+			}
+		}
+		for (let i = 0; i < calls.length; i++) {
+			for (let j = i; j < calls.length; j++) {
+				const dtheta = Math.abs(calls[i].theta - calls[j].theta) * -1;
+				const dprice = Math.abs(calls[i].callValue - calls[j].callValue) * 100;
+				const dstrike = Math.abs(calls[i].strike - calls[j].strike) * 100;
+				if (dtheta <= this.#theta && dprice >= this.#roi && dstrike <= this.#collat) {
+					ccs.push([calls[i].strike, calls[j].strike], calls[i].callValue, calls[j].callValue, dtheta, dprice, dstrike)
+				}
+			}
+		}
+		const ret = {};
+		ret.pcs = pcs;
+		ret.ccs = ccs;
+		return ret;
 	}
 
 	retrieve = async () => {
-		return await this.#parseData(this.#getTestData());
+		const data = await this.#getTestData();
+		return this.#parseData(data);
 	}
 }
 

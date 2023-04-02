@@ -1,4 +1,3 @@
-export const test = "blard"
 export const testData = {
     "data": [
       {
