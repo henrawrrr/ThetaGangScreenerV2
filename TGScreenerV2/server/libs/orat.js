@@ -33,6 +33,14 @@ export class optionsCaller {
 		this.#collat = collat;
 	}
 
+	updateQuery = (ticker, theta, dte, roi, collat) => {
+		this.#ticker = ticker;
+		this.#theta = theta;
+		this.#dte = dte;
+		this.#roi = roi * collat;
+		this.#collat = collat;
+	}
+
 	#getTestData = async () => {
 		return testData;
 	}
