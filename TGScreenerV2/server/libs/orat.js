@@ -60,23 +60,23 @@ export class optionsCaller {
 		})
 		const pcs = [];
 		const ccs = [];
-		for (let i = 0; i < puts.length; i++) {
-			for (let j = i; j < puts.length; j++) {
-				const dtheta = Math.abs(puts[i].theta - puts[j].theta) * -1;
-				const dprice = Math.abs(puts[i].putValue - puts[j].putValue) * 100;
-				const dstrike = Math.abs(puts[i].strike - puts[j].strike) * 100;
+		for (let i = 0; i < puts.length - 1; i++) {
+			for (let j = i + 1; j < puts.length; j++) {
+				const dtheta = Math.abs(puts[i][3] - puts[j][3]) * -1;
+				const dprice = Math.abs(puts[i][2] - puts[j][2]) * 100
+				const dstrike = Math.abs(puts[i][1] - puts[j][1]) * 100;
 				if (dtheta <= this.#theta && dprice >= this.#roi && dstrike <= this.#collat) {
-					pcs.push([puts[i].strike, puts[j].strike], puts[i].putValue, puts[j].putValue, dtheta, dprice, dstrike)
+					pcs.push([[puts[i][1], puts[j][1]], puts[i][2], puts[j][2], dtheta, dprice, dstrike])
 				}
 			}
 		}
-		for (let i = 0; i < calls.length; i++) {
-			for (let j = i; j < calls.length; j++) {
-				const dtheta = Math.abs(calls[i].theta - calls[j].theta) * -1;
-				const dprice = Math.abs(calls[i].callValue - calls[j].callValue) * 100;
-				const dstrike = Math.abs(calls[i].strike - calls[j].strike) * 100;
+		for (let i = 0; i < calls.length - 1; i++) {
+			for (let j = i + 1; j < calls.length; j++) {
+				const dtheta = Math.abs(calls[i][3] - calls[j][3]) * -1;
+				const dprice = Math.abs(calls[i][2] - calls[j][2]) * 100
+				const dstrike = Math.abs(calls[i][1] - calls[j][1]) * 100;
 				if (dtheta <= this.#theta && dprice >= this.#roi && dstrike <= this.#collat) {
-					ccs.push([calls[i].strike, calls[j].strike], calls[i].callValue, calls[j].callValue, dtheta, dprice, dstrike)
+					ccs.push([[calls[i][1], calls[j][1]], calls[i][2], calls[j][2], dtheta, dprice, dstrike])
 				}
 			}
 		}
@@ -87,6 +87,7 @@ export class optionsCaller {
 	}
 
 	retrieve = async () => {
+		console.log(this.#ticker + " " + this.#theta + " " + this.#dte + " " + this.#roi + " " + this.#collat)
 		const data = await this.#getTestData();
 		return this.#parseData(data);
 	}
